@@ -390,3 +390,36 @@ string ProcessParser::getOSName() {
   }
   return "";
 }
+
+int ProcessParser::getTotalThreads() {
+  // Fields
+  string line;
+  int result = 0;
+  string name = "Threads:";
+  vector<string> _list = ProcessParser::getPidList();
+  ifstream stream;
+  string path;
+
+  // for (int i=0; i<_list.size(); i++) {
+  //   string pid = _list[i];
+  //   string path = Path::basePath() + pid + Path::statusPath();
+  // }
+
+  // TODO: test this loop vs above
+  // This method differs from class material slightly.
+  for (string pid : _list) {
+    path = Path::basePath() + pid + Path::statusPath();
+    Util::getStream(path, stream);
+
+    while (std::getline(stream, line)) {
+      if (line.compare(0, name.size(), name) == 0) {
+        istringstream buf(line);
+        istream_iterator<string> beg(buf), end;
+        vector<string> values(beg, end);
+        result += stoi(values[1]);
+        break;
+      }
+    }
+    return result;
+  }
+}
