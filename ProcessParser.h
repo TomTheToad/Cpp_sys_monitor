@@ -183,3 +183,38 @@ string ProcessParser::getProcUser(string pid) {
   }
   return "";
 }
+
+vector<string> ProcessParser::getPidList() {
+  // Fields
+  DIR *dir;
+  vector<string> container;
+
+  // Open pro dir
+  if (!(dir = opendir("\proc")))
+    throw std::runtime_error(std::strerror(errno));
+
+  // Iterate over all directories within proc
+  while (dirent *dirp = readdir(dir)) {
+
+    // make sure item being pointed to is a directory
+    if (dirp->d_type != DT_DIR) {
+      // If not, skip
+      continue;
+    }
+
+    // check directory name is all digits
+    if (all_of(dirp->d_name, dirp->d_name + std::strlen(dirp->d_name),
+               [](char c) { return std::isdigit(c); })) {
+      // passed checks, add to container vector
+      container.push_back(dirp->d_name);
+    }
+  }
+
+  // Make sure directory closed
+  if (closedir(dir)) {
+    throw std::runtime_error(std::strerror(errno));
+  }
+
+  // Finally return container with dir of numbered processes
+  return container;
+}
