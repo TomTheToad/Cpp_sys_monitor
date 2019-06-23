@@ -366,3 +366,27 @@ string ProcessParser::getSysKernelVersion() {
   }
   return "";
 }
+
+// TODO: verify correct method name. Class material differs
+string ProcessParser::getOSName() {
+  // Fields
+  string line;
+  string result;
+  string name = "PRETTY_NAME=";
+  ifstream stream;
+  string path = "/etc/os-release";
+
+  Util::getStream(path, stream);
+
+  while (std::getline(stream, line)) {
+    if (line.compare(0, name.size(), name) == 0) {
+      std::size_t found = line.find("=");
+      found++;
+      result = line.substr(found);
+      result.erase(std::remove(result.begin(), result.end(), '"'),
+                   result.end());
+      return result;
+    }
+  }
+  return "";
+}
