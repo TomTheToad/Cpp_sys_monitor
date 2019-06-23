@@ -423,3 +423,25 @@ int ProcessParser::getTotalThreads() {
     return result;
   }
 }
+
+int ProcessParser::getTotalNumberOfProcesses() {
+  // Fields
+  string line;
+  int result = 0;
+  string name = "processes";
+  ifstream stream;
+  string path = Path::basePath() + Path::statPath();
+
+  Util::getStream(path, stream);
+
+  while (std::getline(stream, line)) {
+    if (line.compare(0, name.size(), name) == 0) {
+      istringstream buf(line);
+      istream_iterator<string> beg(buf), end;
+      vector<string> values(beg, end);
+      result += stoi(values[1]);
+      break;
+    }
+  }
+  return result;
+}
