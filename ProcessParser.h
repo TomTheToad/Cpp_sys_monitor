@@ -346,3 +346,23 @@ float ProcessParser::getSysRamPercent() {
 
   return float(100.0 * (1 - (free_mem / (total_mem - buffers))));
 }
+
+string ProcessParser::getSysKernelVersion() {
+  // Fields
+  string line;
+  string name = "Linux version ";
+  ifstream stream;
+  string path = Path::basePath() + Path::versionPath();
+
+  Util::getStream(path, stream);
+
+  while (std::getline(stream, line)) {
+    if (line.compare(0, name.size(), name) == 0) {
+      istringstream buf(line);
+      istream_iterator<string> beg(buf), end;
+      vector<string> values(beg, end);
+      return values[2];
+    }
+  }
+  return "";
+}
