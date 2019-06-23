@@ -218,3 +218,15 @@ vector<string> ProcessParser::getPidList() {
   // Finally return container with dir of numbered processes
   return container;
 }
+
+string ProcessParser::getCmd(string pid) {
+  // Fields
+  string line;
+  ifstream stream;
+  string path = Path::basePath() + pid + Path::cmdPath();
+
+  // Open stream
+  Util::getStream(path, stream);
+  std::getline(stream, line);
+  return line;
+}
