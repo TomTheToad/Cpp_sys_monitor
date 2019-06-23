@@ -41,10 +41,23 @@ public:
   static int getTotalNumberOfProcesses();
   static int getNumberOfRunningProcesses();
   static string getOSName();
-  static std::string PrintCpuStats(std::vector<std::string> values1,
+  static std::string printCpuStats(std::vector<std::string> values1,
                                    std::vector<std::string> values2);
   static bool isPidExisting(string pid);
 };
+
+// TODO: Figure out where to put these function definitions
+// Helpers -> belong to what class?
+float get_sys_active_cpu_time(vector<string> values) {
+  return (stof(values[S_USER]) + stof(values[S_NICE]) + stof(values[S_SYSTEM]) +
+          stof(values[S_IRQ]) + stof(values[S_SOFTIRQ]) +
+          stof(values[S_STEAL]) + stof(values[S_GUEST]) +
+          stof(values[S_GUEST_NICE]));
+}
+
+float get_sys_idle_cpu_time(vector<string> values) {
+  return (stof(values[S_IDLE]) + stof(values[S_IOWAIT]));
+}
 
 string ProcessParser::getVmSize(string pid) {
   // Fields
@@ -270,15 +283,66 @@ vector<string> ProcessParser::getSysCpuPercent(string coreNumber) {
   return (vector<string>());
 }
 
-// TODO: Figure out where to put these function definitions
-// Helpers -> belong to what class?
-float get_sys_active_cpu_time(vector<string> values) {
-  return (stof(values[S_USER]) + stof(values[S_NICE]) + stof(values[S_SYSTEM]) +
-          stof(values[S_IRQ]) + stof(values[S_SOFTIRQ]) +
-          stof(values[S_STEAL]) + stof(values[S_GUEST]) +
-          stof(values[S_GUEST_NICE]));
+// TODO: check internal method calls are named correctly. Class material shows
+// camel and serpent case.
+string ProcessParser::printCpuStats(vector<string> values1,
+                                    vector<string> values2) {
+  float activeTime =
+      get_sys_active_cpu_time(values2) - get_sys_active_cpu_time(values1);
+  float idleTime =
+      get_sys_idle_cpu_time(values2) - get_sys_idle_cpu_time(values1);
+  float totalTime = activeTime + idleTime;
+  float result = 100.0 * (activeTime / totalTime);
+  return to_string(result);
 }
 
-float get_sys_idle_cpu_time(vector<string> values) {
-  return (stof(values[S_IDLE]) + stof(values[S_IOWAIT]));
+float ProcessParser::getSysRamPercent() {
+  // Fields
+  // names
+  string name1 = "MemAvailable:";
+  string name2 = "MemFree:";
+  string name3 = "Buffers:";
+
+  // result type variables
+  string line;
+  string value;
+  int result;
+  float total_mem = 0;
+  float free_mem = 0;
+  float buffers = 0;
+
+  // file reading variables
+  ifstream stream;
+  string path = Path::basePath() + Path::memInfoPath();
+
+  Util::getStream(path, stream);
+  while (std::getline(stream, line)) {
+
+    if (total_mem != 0 && free_mem != 0) {
+      break;
+    }
+
+    if (line.compare(0, name1.size(), name1) == 0) {
+      istringstream buf(line);
+      istream_iterator<string> beg(buf), end;
+      vector<string> values(beg, end);
+      total_mem = stof(values[1]);
+    }
+
+    if (line.compare(0, name2.size(), name2) == 0) {
+      istringstream buf(line);
+      istream_iterator<string> beg(buf), end;
+      vector<string> values(beg, end);
+      free_mem = stof(values[1]);
+    }
+
+    if (line.compare(0, name3.size(), name3) == 0) {
+      istringstream buf(line);
+      istream_iterator<string> beg(buf), end;
+      vector<string> values(beg, end);
+      buffers = stof(values[1]);
+    }
+  }
+
+  return float(100.0 * (1 - (free_mem / (total_mem - buffers))));
 }
