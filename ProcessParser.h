@@ -89,7 +89,7 @@ string ProcessParser::getCpuPercent(string pid) {
 
   // Open stream
   Util::getStream(path, stream);
-  getline(stream, line);
+  std::getline(stream, line);
   string str = line;
   istringstream buf(str);
   istream_iterator<string> beg(buf), end;
@@ -124,7 +124,7 @@ string ProcessParser::getProcUpTime(string pid) {
 
   // Open stream
   Util::getStream(path, stream);
-  getline(stream, line);
+  std::getline(stream, line);
 
   string str = line;
   istringstream buf(str);
@@ -141,9 +141,45 @@ long int ProcessParser::getSysUpTime() {
   string path = Path::basePath() + Path::upTimePath();
 
   Util::getStream(path, stream);
-  getline(stream, line);
+  std::getline(stream, line);
   istringstream buf(line);
   istream_iterator<string> beg(buf), end;
   vector<string> values(beg, end);
   return stoi(values[0]);
+}
+
+string ProcessParser::getProcUser(string pid) {
+  // Fields
+  string line;
+  string name = "Uid:";
+  string result = "";
+  string path = Path::basePath() + pid + Path::statusPath();
+  ifstream stream;
+
+  // Open stream for UID query
+  Util::getStream(path, stream);
+
+  // Get UID
+  while (std::getline(stream, line)) {
+    if (line.compare(0, name.size(), name) == 0) {
+      istringstream buf(line);
+      istream_iterator<string> beg(buf), end;
+      vector<string> values(beg, end);
+      result = values[1];
+      break;
+    }
+  }
+
+  // Open stream for name of user with above UID
+  Util::getStream("/etc/passwd", stream);
+  name = ("x:" + result);
+
+  // Search for user name associated with UID
+  while (std::getline(stream, line)) {
+    if (line.find(name) != std::string::npos) {
+      result = line.substr(0, line.find(":"));
+      return result;
+    }
+  }
+  return "";
 }
