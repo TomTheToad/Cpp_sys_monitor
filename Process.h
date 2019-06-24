@@ -43,6 +43,6 @@ string Process::getProcess() {
 
   // TODO: test string lengths
   return (this->pid + "   " + this->user + "   " + this->mem.substr(0, 5) +
-          "   " + this->cmd + "   " + this->upTime.substr(0, 30) + "   " +
-          this->cpu);
+          "   " + this->cpu.substr(0, 5) + "   " + this->upTime.substr(0, 30) +
+          "   " + this->cmd.substr(0, 5));
 }
