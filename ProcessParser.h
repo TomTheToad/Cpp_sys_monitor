@@ -43,7 +43,7 @@ public:
   static string getOSName();
   static std::string printCpuStats(std::vector<std::string> values1,
                                    std::vector<std::string> values2);
-  static bool isPidExisting(string pid);
+  // static bool isPidExisting(string pid);
 };
 
 // TODO: Figure out where to put these function definitions
@@ -203,7 +203,7 @@ vector<string> ProcessParser::getPidList() {
   vector<string> container;
 
   // Open pro dir
-  if (!(dir = opendir("\proc")))
+  if (!(dir = opendir("/proc")))
     throw std::runtime_error(std::strerror(errno));
 
   // Iterate over all directories within proc
