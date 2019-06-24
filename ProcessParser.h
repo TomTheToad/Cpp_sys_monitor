@@ -43,11 +43,14 @@ public:
   static string getOSName();
   static std::string printCpuStats(std::vector<std::string> values1,
                                    std::vector<std::string> values2);
+  // The below function was never defined, yet part of the starter code.
+  // I believe it was removed
   // static bool isPidExisting(string pid);
 };
 
-// TODO: Figure out where to put these function definitions
-// Helpers -> belong to what class?
+// Helper functions
+// TODO: the given code has used multiple naming conventions.
+// Figure out what these two functions should be named.
 float get_sys_active_cpu_time(vector<string> values) {
   return (stof(values[S_USER]) + stof(values[S_NICE]) + stof(values[S_SYSTEM]) +
           stof(values[S_IRQ]) + stof(values[S_SOFTIRQ]) +
@@ -59,6 +62,9 @@ float get_sys_idle_cpu_time(vector<string> values) {
   return (stof(values[S_IDLE]) + stof(values[S_IOWAIT]));
 }
 
+// MARK: Begin assigned methods
+
+// Get virtual memory size
 string ProcessParser::getVmSize(string pid) {
   // Fields
   string line;
@@ -89,6 +95,7 @@ string ProcessParser::getVmSize(string pid) {
   return to_string(result);
 }
 
+// Get cpu percentage
 string ProcessParser::getCpuPercent(string pid) {
 
   // Fields
@@ -103,8 +110,8 @@ string ProcessParser::getCpuPercent(string pid) {
   // Open stream
   Util::getStream(path, stream);
   std::getline(stream, line);
-  string str = line;
-  istringstream buf(str);
+  // string str = line;
+  istringstream buf(line);
   istream_iterator<string> beg(buf), end;
   vector<string> values(beg, end);
 
@@ -114,7 +121,6 @@ string ProcessParser::getCpuPercent(string pid) {
   float cutime = stof(values[15]);
   float cstime = stof(values[16]);
   float starttime = stof(values[21]);
-  // TODO: getSysUpTime() to be defined
   float uptime = ProcessParser::getSysUpTime();
   float freq = sysconf(_SC_CLK_TCK);
   float total_time = utime + stime + cutime + cstime;
@@ -125,6 +131,7 @@ string ProcessParser::getCpuPercent(string pid) {
   return to_string(result);
 }
 
+// Get process up time
 string ProcessParser::getProcUpTime(string pid) {
   // Fields
   ifstream stream;
@@ -147,6 +154,7 @@ string ProcessParser::getProcUpTime(string pid) {
   return to_string(float(stof(values[13]) / sysconf(_SC_CLK_TCK)));
 }
 
+// Get system up time
 long int ProcessParser::getSysUpTime() {
   // Fields
   string line;
@@ -161,6 +169,8 @@ long int ProcessParser::getSysUpTime() {
   return stoi(values[0]);
 }
 
+// Get user processes
+// This method was modified to use two individual streams
 string ProcessParser::getProcUser(string pid) {
   // Fields
   string line;
@@ -198,6 +208,7 @@ string ProcessParser::getProcUser(string pid) {
   return "";
 }
 
+// Get PID list
 vector<string> ProcessParser::getPidList() {
   // Fields
   DIR *dir;
@@ -233,6 +244,7 @@ vector<string> ProcessParser::getPidList() {
   return container;
 }
 
+// Get command for given process
 string ProcessParser::getCmd(string pid) {
   // Fields
   string line;
@@ -245,6 +257,7 @@ string ProcessParser::getCmd(string pid) {
   return line;
 }
 
+// Get number of cores
 int ProcessParser::getNumberOfCores() {
   // Fields
   string line;
@@ -264,6 +277,7 @@ int ProcessParser::getNumberOfCores() {
   return 0;
 }
 
+// Get cpu % in use by the system
 vector<string> ProcessParser::getSysCpuPercent(string coreNumber) {
   // Fields
   string line;
@@ -286,6 +300,7 @@ vector<string> ProcessParser::getSysCpuPercent(string coreNumber) {
 
 // TODO: check internal method calls are named correctly. Class material shows
 // camel and serpent case.
+// Print cpu statistics
 string ProcessParser::printCpuStats(vector<string> values1,
                                     vector<string> values2) {
   float activeTime =
@@ -297,6 +312,7 @@ string ProcessParser::printCpuStats(vector<string> values1,
   return to_string(result);
 }
 
+// Get percent of system ram in use
 float ProcessParser::getSysRamPercent() {
   // Fields
   // names
@@ -348,6 +364,7 @@ float ProcessParser::getSysRamPercent() {
   return float(100.0 * (1 - (free_mem / (total_mem - buffers))));
 }
 
+// Get Kernal info (version)
 string ProcessParser::getSysKernelVersion() {
   // Fields
   string line;
@@ -369,6 +386,7 @@ string ProcessParser::getSysKernelVersion() {
 }
 
 // TODO: verify correct method name. Class material differs
+// Get operating system name
 string ProcessParser::getOSName() {
   // Fields
   string line;
@@ -392,6 +410,7 @@ string ProcessParser::getOSName() {
   return "";
 }
 
+// Get total number of logic threads
 int ProcessParser::getTotalThreads() {
   // Fields
   string line;
@@ -400,11 +419,6 @@ int ProcessParser::getTotalThreads() {
   vector<string> _list = ProcessParser::getPidList();
   ifstream stream;
   string path;
-
-  // for (int i=0; i<_list.size(); i++) {
-  //   string pid = _list[i];
-  //   string path = Path::basePath() + pid + Path::statusPath();
-  // }
 
   // TODO: test this loop vs above
   // This method differs from class material slightly.
@@ -425,6 +439,7 @@ int ProcessParser::getTotalThreads() {
   }
 }
 
+// Get total number of processes (running and idle)
 int ProcessParser::getTotalNumberOfProcesses() {
   // Fields
   string line;
@@ -447,6 +462,7 @@ int ProcessParser::getTotalNumberOfProcesses() {
   return result;
 }
 
+// Get total number of running processes
 int ProcessParser::getNumberOfRunningProcesses() {
   // Fields
   string line;
