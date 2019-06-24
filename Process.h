@@ -32,6 +32,8 @@ public:
   string getUpTime() const;
   string getProcess();
 };
+
+// TODO: make sure consistent number of digits
 void Process::setPid(int pid) { this->pid = pid; }
 string Process::getPid() const { return this->pid; }
 string Process::getProcess() {
@@ -42,7 +44,7 @@ string Process::getProcess() {
   this->cpu = ProcessParser::getCpuPercent(this->pid);
 
   // TODO: test string lengths
-  return (this->pid + "  " + "this->user" + "  " + this->cpu.substr(0, 5) +
-          "  " + this->mem.substr(0, 5) + "  " + this->upTime.substr(0, 30) +
-          "  " + this->cmd.substr(0, 5));
+  return (this->pid + "   " + this->user + "   " + this->cpu.substr(0, 5) +
+          "   " + this->mem.substr(0, 5) + "   " + this->upTime.substr(0, 30) +
+          "   " + this->cmd.substr(0, 30));
 }

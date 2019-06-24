@@ -167,13 +167,14 @@ string ProcessParser::getProcUser(string pid) {
   string name = "Uid:";
   string result = "";
   string path = Path::basePath() + pid + Path::statusPath();
-  ifstream stream;
+  ifstream uid_stream;
+  ifstream user_stream;
 
   // Open stream for UID query
-  Util::getStream(path, stream);
+  Util::getStream(path, uid_stream);
 
   // Get UID
-  while (std::getline(stream, line)) {
+  while (std::getline(uid_stream, line)) {
     if (line.compare(0, name.size(), name) == 0) {
       istringstream buf(line);
       istream_iterator<string> beg(buf), end;
@@ -184,11 +185,11 @@ string ProcessParser::getProcUser(string pid) {
   }
 
   // Open stream for name of user with above UID
-  Util::getStream("/etc/passwd", stream);
+  Util::getStream("/etc/passwd", user_stream);
   name = ("x:" + result);
 
   // Search for user name associated with UID
-  while (std::getline(stream, line)) {
+  while (std::getline(user_stream, line)) {
     if (line.find(name) != std::string::npos) {
       result = line.substr(0, line.find(":"));
       return result;
